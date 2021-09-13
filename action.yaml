@@ -1,10 +1,19 @@
 name: 'Docker build and deploy image'
 description: 'Builds and publishes a docker image'
 inputs:
-  url:
-    registry: 'Registry Url'
+  registry:
+    description: 'Registry Url'
     required: false
     default: ghcr.io
+  context:
+    description: 'Context for Dockerfile'
+    required: false
+    default: .
+  dockerfile:
+    description: 'Path for Dockerfile'
+    required: false
+    default: Dockerfile
+    
 runs:
   using: "composite"
   steps:
@@ -24,8 +33,8 @@ runs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
-        file: docker/Dockerfile
-        context: .
+        file: ${{ inputs.dockerfile }}
+        context: ${{ inputs.context }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
