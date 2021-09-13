@@ -13,6 +13,12 @@ inputs:
     description: 'Path for Dockerfile'
     required: false
     default: Dockerfile
+  user:
+    description: 'User Docker login'
+    required: true
+  password:
+    description: 'Password Docker login'
+    required: true
     
 runs:
   using: "composite"
@@ -21,8 +27,8 @@ runs:
       uses: docker/login-action@v1
       with:
         registry: ${{ inputs.registry }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ inputs.user }}
+        password: ${{ inputs.password }}
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
