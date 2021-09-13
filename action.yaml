@@ -1,0 +1,31 @@
+name: 'Docker build and deploy image'
+description: 'Builds and publishes a docker image'
+inputs:
+  url:
+    registry: 'Registry Url'
+    required: false
+    default: ghcr.io
+runs:
+  using: "composite"
+  steps:
+    - name: Log in to the Container registry
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: ${{ inputs.registry }}/${{ github.repository }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        file: docker/Dockerfile
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
