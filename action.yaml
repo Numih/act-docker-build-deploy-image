@@ -22,7 +22,6 @@ inputs:
   platforms:
     description: 'Container platforms'
     required: false
-    default: linux/arm64
     
 runs:
   using: "composite"
