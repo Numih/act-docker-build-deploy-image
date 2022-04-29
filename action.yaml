@@ -22,6 +22,7 @@ inputs:
   platforms:
     description: 'Container platforms'
     required: false
+  # Dev image options
   createDevImage:
     description: 'Define if should create a dev image'
     required: false
@@ -29,9 +30,11 @@ inputs:
   devDockerfile:
     description: 'Path for development Dockerfile'
     required: false
+    default: Dockerfile.dev
   devContext:
     description: 'Context for development Dockerfile'
     required: false
+    default: .
     
 runs:
   using: "composite"
