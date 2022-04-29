@@ -74,9 +74,8 @@ runs:
       with:
         images: ${{ inputs.registry }}/${{ github.repository }}
         flavor: |
-          latest=auto
-          suffix=-dev
-          
+          latest=true
+          suffix=-dev,onlatest=true
 
     - name: Build and push development Docker image
       if: ${{ inputs.createDevImage }}
