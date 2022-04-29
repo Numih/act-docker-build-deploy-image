@@ -22,6 +22,16 @@ inputs:
   platforms:
     description: 'Container platforms'
     required: false
+  createDevImage:
+    description: 'Define if should create a dev image'
+    required: false
+    default: false
+  devDockerfile:
+    description: 'Path for development Dockerfile'
+    required: false
+  devContext:
+    description: 'Context for development Dockerfile'
+    required: false
     
 runs:
   using: "composite"
@@ -48,4 +58,30 @@ runs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        platforms: ${{ inputs.platforms }}
+
+###
+### createDevImage = true
+###
+
+    - name: Extract metadata (tags, labels) for development
+      if: ${{ inputs.createDevImage }}
+      id: meta-dev
+      uses: docker/metadata-action@v3
+      with:
+        images: ${{ inputs.registry }}/${{ github.repository }}
+        flavor: |
+          latest=auto
+          suffix=-dev
+          
+
+    - name: Build and push development Docker image
+      if: ${{ inputs.createDevImage }}
+      uses: docker/build-push-action@v2
+      with:
+        file: ${{ inputs.devDockerfile }}
+        context: ${{ inputs.context }}
+        push: true
+        tags: ${{ steps.meta-dev.outputs.tags }}
+        labels: ${{ steps.meta-dev.outputs.labels }}
         platforms: ${{ inputs.platforms }}
