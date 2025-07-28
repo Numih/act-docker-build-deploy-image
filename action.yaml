@@ -58,3 +58,8 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         platforms: ${{ inputs.platforms }}
+        # Passa o socket SSH para o Dockerfile para o 'go mod download'
+        ssh: default=${{ env.SSH_AUTH_SOCK }}
+        # Adiciona cache para acelerar os builds
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
