@@ -1,10 +1,16 @@
-name: 'Docker build and deploy image'
+name: 'Docker build and push image'
 description: 'Builds and publishes a docker image'
 inputs:
   registry:
     description: 'Registry Url'
     required: false
     default: ghcr.io
+  user:
+    description: 'User Docker login'
+    required: true
+  password:
+    description: 'Password Docker login'
+    required: true
   context:
     description: 'Context for Dockerfile'
     required: false
@@ -13,84 +19,38 @@ inputs:
     description: 'Path for Dockerfile'
     required: false
     default: Dockerfile
-  user:
-    description: 'User Docker login'
-    required: true
-  password:
-    description: 'Password Docker login'
-    required: true
   platforms:
     description: 'Container platforms'
     required: false
-  # Dev image options
-  createDevImage:
-    description: 'Define if should create a dev image'
-    required: false
-    default: false
-  onlyDevImage:
-    description: 'Define if should create only the dev image'
-    required: false
-    default: false
-  devDockerfile:
-    description: 'Path for development Dockerfile'
-    required: false
-    default: Dockerfile.dev
-  devContext:
-    description: 'Context for development Dockerfile'
-    required: false
-    default: .
+    default: 'linux/amd64,linux/arm64'
     
 runs:
   using: "composite"
   steps:
 
     - name: Log in to the Container registry
-      uses: docker/login-action@v1
+      uses: docker/login-action@v3
       with:
         registry: ${{ inputs.registry }}
         username: ${{ inputs.user }}
         password: ${{ inputs.password }}
 
-
-    ###
-    ### createDevImage = true
-    ###
-
-    - name: Extract metadata (tags, labels) for development
-      if: ${{ inputs.createDevImage == 'true' || inputs.onlyDevImage == 'true' }}
-      id: meta-dev
-      uses: docker/metadata-action@v3
-      with:
-        images: ${{ inputs.registry }}/${{ github.repository }}
-        flavor: |
-          latest=true
-          suffix=-dev,onlatest=true
-
-    - name: Build and push development Docker image
-      if: ${{ inputs.createDevImage == 'true' || inputs.onlyDevImage == 'true' }}
-      uses: docker/build-push-action@v2
-      with:
-        file: ${{ inputs.devDockerfile }}
-        context: ${{ inputs.context }}
-        push: true
-        tags: ${{ steps.meta-dev.outputs.tags }}
-        labels: ${{ steps.meta-dev.outputs.labels }}
-        platforms: ${{ inputs.platforms }}
-
-    ###
-    ### default image
-    ###
-
     - name: Extract metadata (tags, labels) for Docker
       if: ${{ inputs.onlyDevImage == 'false' }}
       id: meta
-      uses: docker/metadata-action@v3
+      uses: docker/metadata-action@v5
       with:
         images: ${{ inputs.registry }}/${{ github.repository }}
 
+      # Multiplatform builds
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+        
     - name: Build and push Docker image
-      if: ${{ inputs.onlyDevImage == 'false' }}
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v6
       with:
         file: ${{ inputs.dockerfile }}
         context: ${{ inputs.context }}
