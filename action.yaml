@@ -39,7 +39,6 @@ runs:
         password: ${{ inputs.password }}
 
     - name: Extract metadata (tags, labels) for Docker
-      if: ${{ inputs.onlyDevImage == 'false' }}
       id: meta
       uses: docker/metadata-action@v5
       with:
