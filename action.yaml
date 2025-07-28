@@ -23,6 +23,9 @@ inputs:
     description: 'Container platforms'
     required: false
     default: 'linux/amd64,linux/arm64'
+  ssh:
+    description: 'List of SSH agent socket or keys to expose to the build'
+    required: false
     
 runs:
   using: "composite"
@@ -59,7 +62,7 @@ runs:
         labels: ${{ steps.meta.outputs.labels }}
         platforms: ${{ inputs.platforms }}
         # Passa o socket SSH para o Dockerfile para o 'go mod download'
-        ssh: default=${{ env.SSH_AUTH_SOCK }}
+        ssh: ${{ inputs.ssh }}
         # Adiciona cache para acelerar os builds
         cache-from: type=gha
         cache-to: type=gha,mode=max
